@@ -1,7 +1,9 @@
+@icon("res://addons/cubic_voxel_plugin/icon.svg")
+@tool
 extends Node
 class_name CubicVoxel
 
-# TODO: add instance to replace some blocks, icon, save and load
+# TODO: save and load
 
 @export var blocks_data : Array[BlockData]
 
@@ -9,7 +11,7 @@ class_name CubicVoxel
 @export var collision_shape_target : CollisionShape3D
 
 var blocks_estates_changed : bool = false
-var blocks_estates : Dictionary[Vector3i,BlockEstate]
+var blocks_estates : Dictionary[Vector3i,BlockEstate] = {}
 
 func blocks_estates_set(pos:Vector3i,estate:BlockEstate) -> void:
 	blocks_estates.set(pos,estate)
@@ -25,6 +27,30 @@ func blocks_estates_erase(pos:Vector3i) -> void:
 	blocks_estates.erase(pos)
 	blocks_estates_changed = true
 
+func blocks_estates_clear() -> void:
+	blocks_estates.clear()
+	blocks_estates_changed = true
+
+func blocks_estates_save(path : String) -> void:
+	var save_file : FileAccess = FileAccess.open(path, FileAccess.WRITE)
+	save_file.store_var(blocks_estates,true)
+	save_file.close()
+
+func blocks_estates_load(path : String) -> void:
+	if not FileAccess.file_exists(path):
+		printerr("cant load voxel data on: ",path)
+		return
+	
+	var save_file : FileAccess = FileAccess.open(path, FileAccess.READ)
+	var data : Dictionary[Vector3i, Resource] = save_file.get_var(true)
+	for pos : Vector3i in data:
+		if data[pos] is BlockEstate:
+			blocks_estates_set(pos,data[pos])
+	
+	
+	save_file.close()
+
+
 var planes_to_generate : Dictionary[Material,Array] #Dictionary[Material,Array[PlaneInfo]]
 func add_planes_to_generate(mat:Material,plane:PlaneInfo) -> void:
 	if not planes_to_generate.has(mat):
@@ -37,9 +63,6 @@ func generate_planes() -> void:
 	for pos : Vector3i in blocks_estates:
 		var block_estate : BlockEstate = blocks_estates[pos]
 		var block_data : BlockData = blocks_data[block_estate.id]
-		
-		if block_data.model != null:
-			continue
 		
 		for bo : PlaneInfo.BlockOrientation in block_data.planes:
 			var mat : Material = block_data.planes[bo]

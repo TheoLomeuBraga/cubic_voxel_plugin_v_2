@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="cubic_voxel_plugin_v2"
+config/custom_user_dir_name="cubic_voxel_plugin"
 config/features=PackedStringArray("4.5", "GL Compatibility")
-config/icon="res://icon.svg"
 
 [editor_plugins]
 

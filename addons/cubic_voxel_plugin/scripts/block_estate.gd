@@ -1,3 +1,4 @@
+@icon("res://addons/cubic_voxel_plugin/icon.svg")
 extends Resource
 class_name BlockEstate
 

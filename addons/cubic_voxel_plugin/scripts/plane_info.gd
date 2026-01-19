@@ -1,3 +1,4 @@
+@icon("res://addons/cubic_voxel_plugin/icon.svg")
 extends Resource
 class_name PlaneInfo
 
@@ -10,7 +11,7 @@ enum BlockOrientation {UP,DOWN,LEFT,RIGHT,FORWARD,BACK}
 var uv : Array[Vector2]
 var vertex : Array[Vector3]
 
-static var plane_up : Array[Vector3] = [
+var plane_up : Array[Vector3] = [
 	Vector3(-.5,.5, .5),
 	Vector3(-.5,.5, -.5),
 	Vector3(.5,.5, .5),
@@ -20,7 +21,7 @@ static var plane_up : Array[Vector3] = [
 	Vector3(.5,.5, -.5),
 ]
 
-static var plane_down : Array[Vector3] = [
+var plane_down : Array[Vector3] = [
 	Vector3(-.5,-.5, .5),
 	Vector3(.5,-.5, .5),
 	Vector3(-.5,-.5, -.5),
@@ -30,7 +31,7 @@ static var plane_down : Array[Vector3] = [
 	Vector3(-.5,-.5, -.5),
 ]
 
-static var plane_back : Array[Vector3] = [
+var plane_back : Array[Vector3] = [
 	Vector3(-.5, .5,.5),
 	Vector3(.5, .5,.5),
 	Vector3(-.5, -.5,.5),
@@ -40,7 +41,7 @@ static var plane_back : Array[Vector3] = [
 	Vector3(-.5, -.5,.5),
 ]
 
-static var plane_forward : Array[Vector3] = [
+var plane_forward : Array[Vector3] = [
 	Vector3(-.5, .5,-.5),
 	Vector3(-.5, -.5,-.5),
 	Vector3(.5, .5,-.5),
@@ -50,7 +51,7 @@ static var plane_forward : Array[Vector3] = [
 	Vector3(.5, -.5,-.5),
 ]
 
-static var plane_right : Array[Vector3] = [
+var plane_right : Array[Vector3] = [
 	Vector3(.5,-.5, .5),
 	Vector3(.5,.5, .5),
 	Vector3(.5,-.5, -.5),
@@ -60,7 +61,7 @@ static var plane_right : Array[Vector3] = [
 	Vector3(.5,-.5, -.5),
 ]
 
-static var plane_left : Array[Vector3] = [
+var plane_left : Array[Vector3] = [
 	Vector3(-.5, .5,-.5),
 	Vector3(-.5, .5,.5),
 	Vector3(-.5, -.5,-.5),
@@ -71,7 +72,7 @@ static var plane_left : Array[Vector3] = [
 ]
 
 #enum BlockOrientation {UP,DOWN,LEFT,RIGHT,FORWARD,BACK}
-static var orientation_to_normal : Dictionary[BlockOrientation,Vector3] = {
+var orientation_to_normal : Dictionary[BlockOrientation,Vector3] = {
 	BlockOrientation.UP: Vector3.UP,
 	BlockOrientation.DOWN: Vector3.DOWN,
 	BlockOrientation.LEFT: Vector3.LEFT,
@@ -80,7 +81,7 @@ static var orientation_to_normal : Dictionary[BlockOrientation,Vector3] = {
 	BlockOrientation.BACK: Vector3.BACK,
 }
 
-static var orientation_to_plane : Dictionary[BlockOrientation,Array] = {
+var orientation_to_plane : Dictionary[BlockOrientation,Array] = {
 	BlockOrientation.UP: plane_up,
 	BlockOrientation.DOWN: plane_down,
 	BlockOrientation.LEFT: plane_left,

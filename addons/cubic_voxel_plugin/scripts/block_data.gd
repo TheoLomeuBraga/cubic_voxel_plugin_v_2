@@ -1,3 +1,4 @@
+@icon("res://addons/cubic_voxel_plugin/icon.svg")
 extends Resource
 class_name BlockData
 
@@ -9,6 +10,5 @@ class_name BlockData
 	PlaneInfo.BlockOrientation.FORWARD: null,
 	PlaneInfo.BlockOrientation.BACK: null,
 }
-@export var model : PackedScene
 
 @export var is_tarnsparent : bool = false
