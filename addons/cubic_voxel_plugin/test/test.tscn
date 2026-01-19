@@ -1,0 +1,88 @@
+[gd_scene load_steps=18 format=3 uid="uid://dxgnycpugilfk"]
+
+[ext_resource type="Script" uid="uid://w2y4bf7iunah" path="res://addons/cubic_voxel_plugin/scripts/cubic_voxel.gd" id="1_vytpk"]
+[ext_resource type="Script" uid="uid://bcalrjrlbohb4" path="res://addons/cubic_voxel_plugin/test/free_camera.gd" id="1_y483b"]
+[ext_resource type="Script" uid="uid://mvmnl6yu3mbt" path="res://addons/cubic_voxel_plugin/test/test.gd" id="2_es2sv"]
+[ext_resource type="Script" uid="uid://ucmtgogvqrqj" path="res://addons/cubic_voxel_plugin/scripts/block_data.gd" id="2_r4355"]
+[ext_resource type="Texture2D" uid="uid://5nvqcyd0v4sc" path="res://addons/cubic_voxel_plugin/icon.svg" id="3_r4355"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sp82a"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_nne1x"]
+sky_material = SubResource("ProceduralSkyMaterial_sp82a")
+
+[sub_resource type="Environment" id="Environment_bdgrq"]
+background_mode = 2
+sky = SubResource("Sky_nne1x")
+tonemap_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y483b"]
+albedo_texture = ExtResource("3_r4355")
+
+[sub_resource type="Resource" id="Resource_sp82a"]
+script = ExtResource("2_r4355")
+planes = Dictionary[int, Material]({
+0: SubResource("StandardMaterial3D_y483b"),
+1: SubResource("StandardMaterial3D_y483b"),
+2: SubResource("StandardMaterial3D_y483b"),
+3: SubResource("StandardMaterial3D_y483b"),
+4: SubResource("StandardMaterial3D_y483b"),
+5: SubResource("StandardMaterial3D_y483b")
+})
+metadata/_custom_type_script = "uid://ucmtgogvqrqj"
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sp82a"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nne1x"]
+albedo_color = Color(0.43134022, 0.43134025, 0.43134025, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bdgrq"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_m3n7a"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6hcyp"]
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_v6c4l"]
+albedo_color = Color(0, 0, 1, 1)
+
+[sub_resource type="Resource" id="Resource_y483b"]
+script = ExtResource("2_r4355")
+planes = Dictionary[int, Material]({
+0: SubResource("StandardMaterial3D_sp82a"),
+1: SubResource("StandardMaterial3D_nne1x"),
+2: SubResource("StandardMaterial3D_bdgrq"),
+3: SubResource("StandardMaterial3D_m3n7a"),
+4: SubResource("StandardMaterial3D_6hcyp"),
+5: SubResource("StandardMaterial3D_v6c4l")
+})
+metadata/_custom_type_script = "uid://ucmtgogvqrqj"
+
+[node name="Test" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+fov = 90.0
+script = ExtResource("1_y483b")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_bdgrq")
+
+[node name="CubicVoxel" type="Node" parent="." node_paths=PackedStringArray("mesh_target")]
+script = ExtResource("1_vytpk")
+blocks_data = Array[ExtResource("2_r4355")]([SubResource("Resource_sp82a"), SubResource("Resource_y483b")])
+mesh_target = NodePath("MeshInstance3D")
+metadata/_custom_type_script = "uid://w2y4bf7iunah"
+
+[node name="test" type="Node" parent="CubicVoxel"]
+script = ExtResource("2_es2sv")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CubicVoxel"]
