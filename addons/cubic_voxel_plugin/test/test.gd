@@ -24,16 +24,15 @@ func _ready() -> void:
 			p.blocks_estates_set(Vector3(2+i,.0,.0),BlockEstate.new(1,rand_rot_vec3()))
 		
 		for x : int in range(2,8):
-			for y : int in range(2,8):
+			for y : int in range(2,100):
 				for z : int in range(2,8):
 					p.blocks_estates_set(Vector3(x,y,z),BlockEstate.new(0,rand_rot_vec3()))
 		
 		for x : int in range(2,8):
-			for y : int in range(2,8):
+			for y : int in range(2,100):
 				p.blocks_estates_set(Vector3(x,y,8),BlockEstate.new(3,rand_rot_vec3()))
 			
 		for x : int in range(2,8):
-			for y : int in range(2,8):
+			for y : int in range(2,100):
 				p.blocks_estates_set(Vector3(x,y,9),BlockEstate.new(4,rand_rot_vec3()))
 		
-		p.generate_mesh()

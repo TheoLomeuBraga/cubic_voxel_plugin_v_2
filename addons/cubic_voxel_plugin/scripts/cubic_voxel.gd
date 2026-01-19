@@ -1,7 +1,7 @@
 extends Node
 class_name CubicVoxel
 
-# TODO: multiple transparent objects suport, add instance to replace some blocks, icon, mult thread, save and load
+# TODO: add instance to replace some blocks, icon, save and load
 
 @export var blocks_data : Array[BlockData]
 
@@ -13,6 +13,7 @@ var blocks_estates : Dictionary[Vector3i,BlockEstate]
 
 func blocks_estates_set(pos:Vector3i,estate:BlockEstate) -> void:
 	blocks_estates.set(pos,estate)
+	blocks_estates_changed = true
 
 func blocks_estates_has(pos:Vector3i) -> bool:
 	return blocks_estates.has(pos)
@@ -22,6 +23,7 @@ func blocks_estates_get(pos:Vector3i) -> BlockEstate:
 
 func blocks_estates_erase(pos:Vector3i) -> void:
 	blocks_estates.erase(pos)
+	blocks_estates_changed = true
 
 var planes_to_generate : Dictionary[Material,Array] #Dictionary[Material,Array[PlaneInfo]]
 func add_planes_to_generate(mat:Material,plane:PlaneInfo) -> void:
@@ -31,8 +33,6 @@ func add_planes_to_generate(mat:Material,plane:PlaneInfo) -> void:
 	planes_to_generate[mat].push_back(plane)
 
 func generate_planes() -> void:
-	
-	planes_to_generate.clear()
 	
 	for pos : Vector3i in blocks_estates:
 		var block_estate : BlockEstate = blocks_estates[pos]
@@ -80,15 +80,27 @@ func generate_mesh() -> void:
 		st.set_material(m)
 		st.index()
 		st.commit(mesh)
-
+	
+	planes_to_generate.clear()
 	
 	if mesh_target != null:
-		mesh_target.mesh = mesh
+		mesh_target.call_deferred("set_mesh",mesh)
 	
+	var cps : ConcavePolygonShape3D = mesh.create_trimesh_shape()
 	if collision_shape_target != null:
-		collision_shape_target.shape = mesh.create_trimesh_shape()
+		collision_shape_target.call_deferred("set_shape",cps)
+	
+	blocks_estates_changed = false
 	
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+var task_id : int = -1
+var process_cubes = func(idx:int):
+	generate_mesh()
+
+func _process(delta: float) -> void:
+	if blocks_estates_changed and task_id == -1:
+		task_id = WorkerThreadPool.add_group_task(process_cubes, 1)
+	
+	if task_id != -1 and WorkerThreadPool.is_group_task_completed(task_id):
+		task_id = -1
+		
