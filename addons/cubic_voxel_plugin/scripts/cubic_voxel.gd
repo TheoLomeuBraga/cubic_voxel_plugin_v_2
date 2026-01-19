@@ -3,7 +3,7 @@
 extends Node
 class_name CubicVoxel
 
-# TODO: save and load
+# TODO: make rotation use less space
 
 @export var blocks_data : Array[BlockData]
 
