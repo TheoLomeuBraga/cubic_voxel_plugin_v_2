@@ -90,9 +90,13 @@ var orientation_to_plane : Dictionary[BlockOrientation,Array] = {
 	BlockOrientation.BACK: plane_back,
 }
 
-func _init(_position : Vector3i,_rotation : Vector3,_material : Material,_orientation : BlockOrientation = BlockOrientation.UP) -> void:
+func fix_rotarion(rot:Vector3) -> Vector3:
+	var ret : Vector3
+	return ret
+
+func _init(_position : Vector3i,_rotation : Vector3i,_material : Material,_orientation : BlockOrientation = BlockOrientation.UP) -> void:
 	position = _position
-	rotation = _rotation
+	rotation = _rotation * (PI/2)
 	material = _material
 	orientation = _orientation
 

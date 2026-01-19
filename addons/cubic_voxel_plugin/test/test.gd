@@ -15,10 +15,10 @@ func create_test_scene() -> void:
 		
 		p.blocks_estates_set(Vector3.ZERO,BlockEstate.new(0))
 		
-		p.blocks_estates_set(Vector3(10,.0,.0),BlockEstate.new(2,Vector3(.0,.0,.0)))
-		p.blocks_estates_set(Vector3(11,.0,.0),BlockEstate.new(2,Vector3(.0,.0,-(PI/2.0)*1)))
-		p.blocks_estates_set(Vector3(11,1,.0),BlockEstate.new(2,Vector3(.0,.0,-(PI/2.0)*2)))
-		p.blocks_estates_set(Vector3(10,1,.0),BlockEstate.new(2,Vector3(.0,.0,-(PI/2.0)*3)))
+		p.blocks_estates_set(Vector3(10,.0,.0),BlockEstate.new(2,Vector3i(0,0,0)))
+		p.blocks_estates_set(Vector3(11,.0,.0),BlockEstate.new(2,Vector3(0,0,-1)))
+		p.blocks_estates_set(Vector3(11,1,.0),BlockEstate.new(2,Vector3(0,0,-2)))
+		p.blocks_estates_set(Vector3(10,1,.0),BlockEstate.new(2,Vector3(0,0,-3)))
 		
 		for i : int in range(0,4):
 			p.blocks_estates_set(Vector3(2+i,.0,.0),BlockEstate.new(1,rand_rot_vec3()))
