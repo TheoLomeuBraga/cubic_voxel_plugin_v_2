@@ -10,3 +10,5 @@ class_name BlockData
 	PlaneInfo.BlockOrientation.BACK: null,
 }
 @export var model : PackedScene
+
+@export var is_tarnsparent : bool = false

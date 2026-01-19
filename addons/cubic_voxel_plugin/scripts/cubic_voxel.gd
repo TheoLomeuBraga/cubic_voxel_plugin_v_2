@@ -1,10 +1,14 @@
 extends Node
 class_name CubicVoxel
 
+# TODO: multiple transparent objects suport, add instance to replace some blocks, icon, mult thread, save and load
+
 @export var blocks_data : Array[BlockData]
 
 @export var mesh_target : MeshInstance3D
+@export var collision_shape_target : CollisionShape3D
 
+var blocks_estates_changed : bool = false
 var blocks_estates : Dictionary[Vector3i,BlockEstate]
 
 func blocks_estates_set(pos:Vector3i,estate:BlockEstate) -> void:
@@ -41,13 +45,17 @@ func generate_planes() -> void:
 			var mat : Material = block_data.planes[bo]
 			var p : PlaneInfo = PlaneInfo.new(pos,block_estate.rotation,mat,bo)
 			
-			#if not blocks_estates_has(p.position + Vector3i(p.get_normal())):
-			#	add_planes_to_generate(mat,p)
-			add_planes_to_generate(mat,p)
+			var side_block_position : Vector3 = p.position + Vector3i(p.get_normal())
+			var has_empty_on_side : bool = not blocks_estates_has(side_block_position)
+			var has_transparent_on_side : bool = not has_empty_on_side and blocks_data[blocks_estates_get(side_block_position).id].is_tarnsparent
+			var has_diferent_block_type_on_side : bool = false
+			if not has_empty_on_side:
+				has_diferent_block_type_on_side = block_estate.id != blocks_estates_get(side_block_position).id
+			
+			if has_empty_on_side or (has_transparent_on_side and has_diferent_block_type_on_side):
+				add_planes_to_generate(mat,p)
 			
 
-var vert_count : int = 0
-var plane_count : int = 0
 func generate_mesh() -> void:
 	generate_planes()
 	
@@ -60,8 +68,6 @@ func generate_mesh() -> void:
 		
 		for p : PlaneInfo in planes_to_generate[m]:
 			
-			plane_count+=1
-			
 			var vertex : Array[Vector3] = p.get_vertex_data()
 			var uv : Array[Vector2] = p.get_uv_data()
 			
@@ -69,20 +75,18 @@ func generate_mesh() -> void:
 				st.set_uv(uv[i])
 				st.set_normal(p.get_normal())
 				st.add_vertex(vertex[i])
-				vert_count += 1
 		
 		
 		st.set_material(m)
 		st.index()
 		st.commit(mesh)
-		
-		print("vert_count: ",vert_count)
-		print("plane_count: ",plane_count)
 
 	
 	if mesh_target != null:
 		mesh_target.mesh = mesh
 	
+	if collision_shape_target != null:
+		collision_shape_target.shape = mesh.create_trimesh_shape()
 	
 
 # Called when the node enters the scene tree for the first time.
