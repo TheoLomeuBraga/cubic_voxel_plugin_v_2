@@ -3,28 +3,60 @@
 extends Node
 class_name CubicVoxel
 
-# TODO: make rotation use less space
+static var all_chuncks : Array[CubicVoxel]
+static var all_chuncks_mutex : Mutex = Mutex.new()
 
 @export var blocks_data : Array[BlockData]
 
 @export var mesh_target : MeshInstance3D
 @export var collision_shape_target : CollisionShape3D
 
+
+
 var blocks_estates_changed : bool = false
 var blocks_estates : Dictionary[Vector3i,BlockEstate] = {}
 var blocks_estates_lock : Mutex = Mutex.new()
 
+
+
 func blocks_estates_set(pos:Vector3i,estate:BlockEstate) -> void:
+	
 	blocks_estates_lock.lock()
 	blocks_estates.set(pos,estate)
 	blocks_estates_changed = true
 	blocks_estates_lock.unlock()
 
 func blocks_estates_has(pos:Vector3i) -> bool:
-	return blocks_estates.has(pos)
+	blocks_estates_lock.lock()
+	var ret : bool = blocks_estates.has(pos)
+	blocks_estates_lock.unlock()
+	return ret
+
+static func all_chuncks_blocks_estates_has(pos:Vector3i) -> bool:
+	all_chuncks_mutex.lock()
+	for c : CubicVoxel in all_chuncks:
+		if c.blocks_estates_has(pos):
+			all_chuncks_mutex.unlock()
+			return true
+		
+	all_chuncks_mutex.unlock()
+	return false
 
 func blocks_estates_get(pos:Vector3i) -> BlockEstate:
-	return blocks_estates[pos]
+	all_chuncks_mutex.lock()
+	var ret : BlockEstate = blocks_estates[pos]
+	all_chuncks_mutex.unlock()
+	return ret
+
+static func all_chuncks_blocks_estates_get(pos:Vector3i) -> BlockEstate:
+	all_chuncks_mutex.lock()
+	for c : CubicVoxel in all_chuncks:
+		if c.blocks_estates_has(pos):
+			all_chuncks_mutex.unlock()
+			return c.blocks_estates_get(pos)
+		
+	all_chuncks_mutex.unlock()
+	return null
 
 func blocks_estates_erase(pos:Vector3i) -> void:
 	blocks_estates_lock.lock()
@@ -91,13 +123,14 @@ func generate_planes() -> void:
 			var p : PlaneInfo = PlaneInfo.new(pos,block_estate.rotation,mat,bo)
 			
 			var side_block_position : Vector3 = p.position + Vector3i(p.get_normal())
-			var has_empty_on_side : bool = not blocks_estates_has(side_block_position)
-			var has_transparent_on_side : bool = not has_empty_on_side and blocks_data[blocks_estates_get(side_block_position).id].is_tarnsparent
+			var has_empty_on_side : bool = not all_chuncks_blocks_estates_has(side_block_position)
+			var has_transparent_on_side : bool = not has_empty_on_side and blocks_data[all_chuncks_blocks_estates_get(side_block_position).id].is_tarnsparent
 			var has_diferent_block_type_on_side : bool = false
 			if not has_empty_on_side:
-				has_diferent_block_type_on_side = block_estate.id != blocks_estates_get(side_block_position).id
+				has_diferent_block_type_on_side = block_estate.id != all_chuncks_blocks_estates_get(side_block_position).id
 			
-			if has_empty_on_side or (has_transparent_on_side and has_diferent_block_type_on_side):
+			
+			if (has_empty_on_side or (has_transparent_on_side and has_diferent_block_type_on_side)):
 				add_planes_to_generate(mat,p)
 			
 
@@ -149,4 +182,13 @@ func _process(delta: float) -> void:
 	
 	if task_id != -1 and WorkerThreadPool.is_group_task_completed(task_id):
 		task_id = -1
-		
+
+func _ready() -> void:
+	all_chuncks_mutex.lock()
+	all_chuncks.push_back(self)
+	all_chuncks_mutex.unlock()
+
+func _exit_tree() -> void:
+	all_chuncks_mutex.lock()
+	all_chuncks.erase(self)
+	all_chuncks_mutex.unlock()
