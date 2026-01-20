@@ -12,10 +12,13 @@ class_name CubicVoxel
 
 var blocks_estates_changed : bool = false
 var blocks_estates : Dictionary[Vector3i,BlockEstate] = {}
+var blocks_estates_lock : Mutex = Mutex.new()
 
 func blocks_estates_set(pos:Vector3i,estate:BlockEstate) -> void:
+	blocks_estates_lock.lock()
 	blocks_estates.set(pos,estate)
 	blocks_estates_changed = true
+	blocks_estates_lock.unlock()
 
 func blocks_estates_has(pos:Vector3i) -> bool:
 	return blocks_estates.has(pos)
@@ -24,39 +27,58 @@ func blocks_estates_get(pos:Vector3i) -> BlockEstate:
 	return blocks_estates[pos]
 
 func blocks_estates_erase(pos:Vector3i) -> void:
+	blocks_estates_lock.lock()
 	blocks_estates.erase(pos)
 	blocks_estates_changed = true
+	blocks_estates_lock.unlock()
 
 func blocks_estates_clear() -> void:
+	blocks_estates_lock.lock()
 	blocks_estates.clear()
 	blocks_estates_changed = true
+	blocks_estates_lock.unlock()
 
 func blocks_estates_save(path : String) -> void:
+	
 	var save_file : FileAccess = FileAccess.open(path, FileAccess.WRITE)
+	
+	blocks_estates_lock.lock()
 	save_file.store_var(blocks_estates,true)
+	blocks_estates_lock.unlock()
+	
 	save_file.close()
+	
 
 func blocks_estates_load(path : String) -> void:
+	
 	if not FileAccess.file_exists(path):
 		printerr("cant load voxel data on: ",path)
 		return
 	
+	blocks_estates_lock.lock()
 	var save_file : FileAccess = FileAccess.open(path, FileAccess.READ)
 	var data : Dictionary[Vector3i, Resource] = save_file.get_var(true)
 	for pos : Vector3i in data:
 		if data[pos] is BlockEstate:
-			blocks_estates_set(pos,data[pos])
+			blocks_estates.set(pos,data[pos])
 	
+	blocks_estates_changed = true
+	blocks_estates_lock.unlock()
 	
 	save_file.close()
 
 
 var planes_to_generate : Dictionary[Material,Array] #Dictionary[Material,Array[PlaneInfo]]
+var planes_to_generate_mutex : Mutex = Mutex.new()
 func add_planes_to_generate(mat:Material,plane:PlaneInfo) -> void:
 	if not planes_to_generate.has(mat):
+		planes_to_generate_mutex.lock()
 		planes_to_generate.set(mat,[])
+		planes_to_generate_mutex.unlock()
 	
+	planes_to_generate_mutex.lock()
 	planes_to_generate[mat].push_back(plane)
+	planes_to_generate_mutex.unlock()
 
 func generate_planes() -> void:
 	
@@ -109,7 +131,8 @@ func generate_mesh() -> void:
 	if mesh_target != null:
 		mesh_target.call_deferred("set_mesh",mesh)
 	
-	var cps : ConcavePolygonShape3D = mesh.create_trimesh_shape()
+	#var cps : ConcavePolygonShape3D = mesh.create_trimesh_shape()
+	var cps : ConcavePolygonShape3D = mesh.call_deferred("create_trimesh_shape")
 	if collision_shape_target != null:
 		collision_shape_target.call_deferred("set_shape",cps)
 	

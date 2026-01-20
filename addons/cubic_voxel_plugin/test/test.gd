@@ -37,6 +37,17 @@ func create_test_scene() -> void:
 				p.blocks_estates_set(Vector3(x,y,9),BlockEstate.new(4,rand_rot_vec3()))
 		
 
+@export var noise : Noise
+
+func create_test_scene_noise() -> void:
+	var p : CubicVoxel = get_parent()
+	if p != null and noise != null:
+		for x in range(0,32):
+			for y in range(0,32):
+				for z in range(0,32):
+					if max(1,noise.get_noise_2d(x,z) * 32.0) > y:
+						p.blocks_estates_set(Vector3(x,y,z),BlockEstate.new(0,rand_rot_vec3()))
+
 func clean_build() -> void:
 	var p : CubicVoxel = get_parent()
 	if p != null:
@@ -53,6 +64,7 @@ func load_build() -> void:
 		p.blocks_estates_load("user://test.bin")
 
 @export_tool_button("build") var build = create_test_scene
+@export_tool_button("build noise") var build_noise = create_test_scene_noise
 @export_tool_button("clean") var clean = clean_build
 
 @export_tool_button("save") var save = save_build
@@ -60,4 +72,6 @@ func load_build() -> void:
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
-		create_test_scene()
+		return
+		#create_test_scene()
+		#create_test_scene_noise()
